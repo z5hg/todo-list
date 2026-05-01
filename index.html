@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="今日やること" />
+  <title>今日やること</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Hiragino Sans', 'Yu Gothic', sans-serif;
+      padding: env(safe-area-inset-top, 24px) 24px env(safe-area-inset-bottom, 24px);
+    }
+
+    .card {
+      background: rgba(255,255,255,0.06);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 32px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+      animation: fadeUp 0.6s cubic-bezier(.22,1,.36,1) forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .label {
+      color: rgba(255,255,255,0.4);
+      font-size: 11px;
+      letter-spacing: 3px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .badge {
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      color: #fff;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .progress-track {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a78bfa, #60a5fa);
+      border-radius: 4px;
+      transition: width 0.5s cubic-bezier(.22,1,.36,1);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.5);
+      padding: 6px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .tab.active {
+      background: rgba(167,139,250,0.2);
+      border-color: rgba(167,139,250,0.5);
+      color: #a78bfa;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 80px;
+      margin-bottom: 24px;
+    }
+
+    .empty {
+      color: rgba(255,255,255,0.3);
+      text-align: center;
+      padding: 24px;
+      font-size: 14px;
+    }
+
+    .item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255,255,255,0.07);
+      animation: slideIn 0.3s cubic-bezier(.22,1,.36,1);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .check {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(167,139,250,0.5);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      font-size: 12px;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .check.done {
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      border-color: transparent;
+    }
+
+    .item-text {
+      flex: 1;
+      color: rgba(255,255,255,0.9);
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+
+    .item-text.done {
+      color: rgba(255,255,255,0.3);
+      text-decoration: line-through;
+    }
+
+    .del {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.25);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+      transition: color 0.2s;
+      font-family: inherit;
+    }
+
+    .del:hover { color: rgba(255,100,100,0.7); }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .input {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 14px;
+      color: #fff;
+      font-size: 15px;
+      padding: 14px 18px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .input::placeholder { color: rgba(255,255,255,0.3); }
+    .input:focus { border-color: rgba(167,139,250,0.5); }
+
+    .add-btn {
+      background: linear-gradient(135deg, #a78bfa, #60a5fa);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 26px;
+      width: 52px;
+      cursor: pointer;
+      font-weight: 300;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+
+    .add-btn:active { opacity: 0.7; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div>
+        <div class="label">MY TASKS</div>
+        <div class="title">今日やること</div>
+      </div>
+      <div class="badge" id="badge">0/0</div>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress" style="width:0%"></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="setFilter('すべて', this)">すべて</button>
+      <button class="tab" onclick="setFilter('未完了', this)">未完了</button>
+      <button class="tab" onclick="setFilter('完了', this)">完了</button>
+    </div>
+    <div class="list" id="list"></div>
+    <div class="input-row">
+      <input class="input" id="input" placeholder="新しいタスクを追加..." onkeydown="if(event.key==='Enter') addTodo()" />
+      <button class="add-btn" onclick="addTodo()">+</button>
+    </div>
+  </div>
+
+  <script>
+    let todos = JSON.parse(localStorage.getItem('todos') || 'null') || [
+      { id: 1, text: 'コーヒーを淹れる', done: true },
+      { id: 2, text: 'コードをレビューする', done: false },
+      { id: 3, text: '散歩に行く', done: false },
+    ];
+    let filter = 'すべて';
+
+    function save() {
+      localStorage.setItem('todos', JSON.stringify(todos));
+    }
+
+    function setFilter(f, btn) {
+      filter = f;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      render();
+    }
+
+    function addTodo() {
+      const input = document.getElementById('input');
+      const text = input.value.trim();
+      if (!text) return;
+      todos.push({ id: Date.now(), text, done: false });
+      input.value = '';
+      save();
+      render();
+    }
+
+    function toggle(id) {
+      todos = todos.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      save();
+      render();
+    }
+
+    function remove(id) {
+      todos = todos.filter(t => t.id !== id);
+      save();
+      render();
+    }
+
+    function render() {
+      const doneCount = todos.filter(t => t.done).length;
+      const progress = todos.length ? (doneCount / todos.length) * 100 : 0;
+      document.getElementById('badge').textContent = `${doneCount}/${todos.length}`;
+      document.getElementById('progress').style.width = progress + '%';
+
+      const filtered = todos.filter(t => {
+        if (filter === '未完了') return !t.done;
+        if (filter === '完了') return t.done;
+        return true;
+      });
+
+      const list = document.getElementById('list');
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="empty">タスクがありません</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(t => `
+        <div class="item">
+          <button class="check ${t.done ? 'done' : ''}" onclick="toggle(${t.id})">
+            ${t.done ? '✓' : ''}
+          </button>
+          <span class="item-text ${t.done ? 'done' : ''}">${escapeHtml(t.text)}</span>
+          <button class="del" onclick="remove(${t.id})">×</button>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    render();
+  </script>
+</body>
+</html>
